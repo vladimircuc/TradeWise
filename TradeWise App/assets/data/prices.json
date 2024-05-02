@@ -1,0 +1,160 @@
+{
+    "prices": [
+        {
+            "price": "60.06",
+            "code": "AAPL"
+        },
+        {
+            "price": "126.19",
+            "code": "MSFT"
+        },
+        {
+            "price": "131.52",
+            "code": "AMZN"
+        },
+        {
+            "price": "47.40",
+            "code": "GOOGL"
+        },
+        {
+            "price": "134.32",
+            "code": "GOOG"
+        },
+        {
+            "price": "147.23",
+            "code": "META"
+        },
+        {
+            "price": "16.39",
+            "code": "TSLA"
+        },
+        {
+            "price": "22.55",
+            "code": "NVDA"
+        },
+        {
+            "price": "37.88",
+            "code": "JNJ"
+        },
+        {
+            "price": "165.72",
+            "code": "V"
+        },
+        {
+            "price": "183.86",
+            "code": "JPM"
+        },
+        {
+            "price": "114.46",
+            "code": "WMT"
+        },
+        {
+            "price": "92.31",
+            "code": "PG"
+        },
+        {
+            "price": "38.24",
+            "code": "UNH"
+        },
+        {
+            "price": "54.77",
+            "code": "MA"
+        },
+        {
+            "price": "158.58",
+            "code": "HD"
+        },
+        {
+            "price": "67.08",
+            "code": "ADBE"
+        },
+        {
+            "price": "45.85",
+            "code": "PYPL"
+        },
+        {
+            "price": "101.51",
+            "code": "BAC"
+        },
+        {
+            "price": "42.39",
+            "code": "INTC"
+        },
+        {
+            "price": "98.18",
+            "code": "CSCO"
+        },
+        {
+            "price": "169.77",
+            "code": "NFLX"
+        },
+        {
+            "price": "63.01",
+            "code": "ABT"
+        },
+        {
+            "price": "121.61",
+            "code": "KO"
+        },
+        {
+            "price": "39.11",
+            "code": "PFE"
+        },
+        {
+            "price": "152.25",
+            "code": "CRM"
+        },
+        {
+            "price": "83.91",
+            "code": "MRK"
+        },
+        {
+            "price": "48.66",
+            "code": "XOM"
+        },
+        {
+            "price": "73.91",
+            "code": "BA"
+        },
+        {
+            "price": "46.62",
+            "code": "DIS"
+        },
+        {
+            "price": "198.03",
+            "code": "MMM"
+        },
+        {
+            "price": "33.55",
+            "code": "VZ"
+        },
+        {
+            "price": "43.55",
+            "code": "IBM"
+        },
+        {
+            "price": "188.04",
+            "code": "BRK.B"
+        },
+        {
+            "price": "135.27",
+            "code": "T"
+        },
+        {
+            "price": "110.34",
+            "code": "GE"
+        },
+        {
+            "price": "109.28",
+            "code": "GM"
+        },
+        {
+            "price": "170.23",
+            "code": "F"
+        },
+        {
+            "price": "171.26",
+            "code": "C"
+        }
+    ]
+}

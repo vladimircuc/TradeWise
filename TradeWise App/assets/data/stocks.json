@@ -1,0 +1,156 @@
+{
+    "stocks": [
+        {
+            "name": "Apple Inc.",
+            "code": "AAPL"
+        },
+        {
+            "name": "Microsoft Corporation",
+            "code": "MSFT"
+        },
+        {
+            "name": "Amazon.com Inc.",
+            "code": "AMZN"
+        },
+        {
+            "name": "Alphabet Inc. (Class A)",
+            "code": "GOOGL"
+        },
+        {
+            "name": "Alphabet Inc. (Class C)",
+            "code": "GOOG"
+        },
+        {
+            "name": "Meta Platforms Inc.",
+            "code": "META"
+        },
+        {
+            "name": "Tesla Inc.",
+            "code": "TSLA"
+        },
+        {
+            "name": "NVIDIA Corporation",
+            "code": "NVDA"
+        },
+        {
+            "name": "Johnson & Johnson",
+            "code": "JNJ"
+        },
+        {
+            "name": "Visa Inc.",
+            "code": "V"
+        },
+        {
+            "name": "JPMorgan Chase & Co.",
+            "code": "JPM"
+        },
+        {
+            "name": "Walmart Inc.",
+            "code": "WMT"
+        },
+        {
+            "name": "Procter & Gamble Company",
+            "code": "PG"
+        },
+        {
+            "name": "UnitedHealth Group Incorporated",
+            "code": "UNH"
+        },
+        {
+            "name": "Mastercard Incorporated",
+            "code": "MA"
+        },
+        {
+            "name": "The Home Depot Inc.",
+            "code": "HD"
+        },
+        {
+            "name": "Adobe Inc.",
+            "code": "ADBE"
+        },
+        {
+            "name": "PayPal Holdings Inc.",
+            "code": "PYPL"
+        },
+        {
+            "name": "Bank of America Corporation",
+            "code": "BAC"
+        },
+        {
+            "name": "Intel Corporation",
+            "code": "INTC"
+        },
+        {
+            "name": "Cisco Systems Inc.",
+            "code": "CSCO"
+        },
+        {
+            "name": "Netflix Inc.",
+            "code": "NFLX"
+        },
+        {
+            "name": "Abbott Laboratories",
+            "code": "ABT"
+        },
+        {
+            "name": "Coca-Cola Company",
+            "code": "KO"
+        },
+        {
+            "name": "Pfizer Inc.",
+            "code": "PFE"
+        },
+        {
+            "name": "Salesforce.com Inc.",
+            "code": "CRM"
+        },
+        {
+            "name": "Merck & Co. Inc.",
+            "code": "MRK"
+        },
+        {
+            "name": "Exxon Mobil Corporation",
+            "code": "XOM"
+        },
+        {
+            "name": "Boeing Company",
+            "code": "BA"
+        },
+        {
+            "name": "Walt Disney Company",
+            "code": "DIS"
+        },
+        {
+            "name": "3M Company",
+            "code": "MMM"
+        },
+        {
+            "name": "Verizon Communications Inc.",
+            "code": "VZ"
+        },
+        {
+            "name": "IBM",
+            "code": "IBM"
+        },
+        {
+            "name": "AT&T Inc.",
+            "code": "T"
+        },
+        {
+            "name": "General Electric Company",
+            "code": "GE"
+        },
+        {
+            "name": "General Motors Company",
+            "code": "GM"
+        },
+        {
+            "name": "Ford Motor Company",
+            "code": "F"
+        },
+        {
+            "name": "Citigroup Inc.",
+            "code": "C"
+        }
+    ]
+}
