@@ -40,21 +40,21 @@ To get a local copy up and running follow these simple steps.
 
 ### Installation
 
-1.Navigate to the API code in the TradeWise API folder and run:
-  "python -m uvicorn main:app --port 5000 --reload"
-  or
-  "uvicorn main:app --port 5000 --reload"
-2.Create an Android emultor in Android Studio with these specifications for the best experience:
-  "Pixel 7 Pro 11.0("R")|x86 API 30"
+1.Navigate to the API code in the TradeWise API folder and run:    
+  "python -m uvicorn main:app --port 5000 --reload"    
+  or    
+  "uvicorn main:app --port 5000 --reload"    
+2.Create an Android emultor in Android Studio with these specifications for the best experience:    
+  "Pixel 7 Pro 11.0("R")|x86 API 30"    
 
 ### Running
 
-1.Activate the Android emultor as your device on the down right section 
-2.Navigate to the "main" file in the TradeWise App folder and run these 3 lines of code:
-  "flutter clean"
-  "dart pub get"
-  "flutter run"
-
+1.Activate the Android emultor as your device on the down right section     
+2.Navigate to the "main" file in the TradeWise App folder and run these 3 lines of code:    
+  "flutter clean"    
+  "dart pub get"   
+  "flutter run"    
+  
 ## Modules
 
 **Course Page:**
