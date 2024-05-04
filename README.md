@@ -17,7 +17,7 @@ A trading and educational app designed for beginners by a team of students at Fl
 * [Modules](#modules)
 * [Design](#design)
 * [Evaluation](#evaluation)
-* [Extras](#extras)
+* [Extras](#acknowledgements)
 
 ## About The Project
 
@@ -135,15 +135,18 @@ The Model, View, Service (MVS) design pattern is used throughout the development
 
 ## Evaluation
 
-<!--
-Discuss the stability of your implementation. What works well? Are there any bugs? Is everything tested properly? Are there still features that have not been implemented? Also, if you had the time, what improvements would you make to your implementation? Are there things which you would have done completely differently? Try to aim for at least 250 words.
--->
+The app's overall functionality is robust. Authentication operates seamlessly, enabling users to register and sign in without issues while securely saving their information in Firebase. The app comprehensively covers the features expected in a virtual trading platform, and the custom API provides real-time data to give users an immersive experience. However, one area that could be improved is the speed of extracting and managing user data from the database. In future iterations, finding a more efficient way to access data will be crucial for delivering a smoother user experience. For instance, launching data-intensive pages like the portfolio page, which requires significant database extraction, API retrievals, and complex calculations, can result in slight delays that impact user satisfaction.
 
-## Extras
+Two other features weren't completed during development: the notification system and real-time updates of unrealized profit. The notification system would have required more time and effort to implement functions like notifying users when a specific trade has reached a particular growth percentage or alerting them when the market opens and closes. Although preliminary tests were conducted, the desired functionality was not fully achieved. Meanwhile, real-time unrealized profit updates require fundamental changes to the API structure. This feature would need a constantly running API hosted on a dedicated server, along with a scheduled process to access the database at specific times. The process would calculate unrealized profit daily and save the results back to the database for later visualization in the portfolio analytics.
 
-<!--
-If you implemented any extras, you can list/mention them here.
--->
+These two features represent a strong starting point for the app's future development. With more time and resources, their implementation would significantly enhance the overall trading experience, providing users with a more comprehensive and solid platform.
+
+## Acknowledgements
+
+This app was developed as part of a group project within the Florida Southern College Computer Science department. I would like to acknowledge the other team members who also contributed to this successful project:
+ - Brenda Alvarez
+ - Cade Butler
+ - Joshua Hammond
 
 ___
 
