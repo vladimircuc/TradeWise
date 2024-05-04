@@ -93,11 +93,45 @@ Users can also search for others in the database to view their profiles. This fe
 
 ## Design
 
-<!--
-List all the design patterns you used in your program. For every pattern, describe the following:
-- Where it is used in your application.
-- What benefit it provides in your application. Try to be specific here. For example, don't just mention a pattern improves maintainability, but explain in what way it does so.
--->
+The Model, View, Service (MVS) design pattern is used throughout the development of this app. This structure provides a well-defined organization that enhances maintainability, modularity, and scalability. Here's how each section is structured and the benefits they offer:
+
+1. **Modules Section (Model):**
+   - The Modules section prioritizes different stock models, creating clear data structures that developers can easily understand and modify.
+   - It provides a consistent data framework for storing, retrieving, and manipulating data.
+   - Benefits include:
+     - Simplified feature implementation since data relationships and structures are predefined.
+     - Clear data separation, reducing errors and improving data integrity.
+     - Centralized data logic, making debugging and updates more straightforward.
+
+2. **Pages Section (View):**
+   - In mobile apps, the "View" is represented by various pages (screens) that form the user interface.
+   - Each page in this app corresponds to a specific function, like trading, news, and portfolio.
+   - Benefits include:
+     - A user-friendly interface that guides users through the app's features intuitively.
+     - Isolated UI components that streamline updates and allow independent customization.
+     - Enhanced user engagement through interactive layouts, data visualizations, and real-time information.
+
+3. **Service Section (Service):**
+   - The Service section handles background functions such as database management and API communication.
+   - This layer manages data synchronization with Firebase and interacts with the custom API.
+   - Benefits include:
+     - Robust backend logic that streamlines data management, ensuring consistent and accurate information across pages.
+     - Centralized APIs to interact seamlessly with external services, enhancing security and reducing network traffic.
+
+**Custom API:**
+- The custom API was created using Uvicorn, a lightning-fast ASGI server for Python.
+- It provides tailored information on current stock prices and historical data.
+- Benefits include:
+  - Customization allows the API to deliver data specific to the app’s requirements, minimizing irrelevant information.
+  - Real-time data fetching ensures accurate stock information and updates.
+  - Enables advanced data analysis and visualization through structured and optimized endpoints.
+
+**Firebase:**
+- Firebase serves as the core database and authentication platform for the app, providing several key benefits:
+  - Real-Time Synchronization: Synchronizes data across user devices in real time, ensuring that changes and updates are consistently reflected.
+  - Secure Data Storage: Stores data securely with robust encryption and user authentication to protect sensitive information.
+  - User Authentication: Simplifies account management by allowing users to register and sign in with email/password or third-party providers. This ensures only authenticated users can access sensitive features.
+  - Simplified Implementation: Reduces development time for managing user accounts, file storage, and analytics by integrating these services seamlessly. This results in faster implementation and a more cohesive data management strategy.
 
 ## Evaluation
 
