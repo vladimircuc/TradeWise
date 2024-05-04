@@ -15,7 +15,7 @@ A trading and educational app designed for beginners by a team of students at Fl
   * [Installation](#installation)
   * [Running](#running)
 * [Modules](#modules)
-* [Notes](#notes)
+* [Design](#design)
 * [Evaluation](#evaluation)
 * [Extras](#extras)
 
