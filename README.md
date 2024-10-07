@@ -52,7 +52,7 @@ To get a local copy up and running follow these simple steps.
 
 1.Activate the Android emultor as your device on the down right section     
 
-2.Navigate to the "main" file in the TradeWise App folder and run these 3 lines of code:    
+2.Navigate to the "lib/main.dart" file in the TradeWise App folder and run these 3 lines of code:    
   "flutter clean"    
   "dart pub get"   
   "flutter run"    
