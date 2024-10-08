@@ -19,6 +19,11 @@ A trading and educational app designed for beginners by a team of students at Fl
 * [Evaluation](#evaluation)
 * [Extras](#acknowledgements)
 
+## Project Demo   
+Please follow the link below for a project demonstration.    
+
+Link: https://www.loom.com/share/500d9381ad374fa0a2823acb47b0289c?sid=4405c764-4c69-4f81-b0f7-6e4ff1fbb45b 
+
 ## About The Project
 
 TradeWise is a beginner-friendly stock market trading app focused on enhancing learning and experience for all users. Each user creates an account securely stored on a Firebase database, allowing for continuous tracking of their trades and course progress.     
