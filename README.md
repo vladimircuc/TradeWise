@@ -7,7 +7,7 @@ A trading and educational app designed for beginners by a team of students at Fl
 </p>
 
 ## Table of Contents
-
+* [Project Demo](#project-demo)
 * [About the Project](#about-the-project)
   * [Built With](#built-with)
 * [Getting Started](#getting-started)
