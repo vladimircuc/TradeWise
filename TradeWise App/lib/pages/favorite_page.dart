@@ -1,24 +1,17 @@
 import 'dart:convert';
-// import 'dart:ffi';
-// import 'package:http/http.dart' as http;
-
-//import for notifications
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import '../components/charts/chart_display.dart';
-import '../components/fav_cards.dart';
-import '../models/stock_model.dart';
-import '../service/controller.dart';
-import "package:firebase_auth/firebase_auth.dart";
-
-//imports for browsing page
-import '../components/my_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fuzzy/fuzzy.dart';
 
+import '../components/charts/chart_display.dart';
+import '../components/fav_cards.dart';
+import '../components/my_card.dart';
+import '../models/stock_model.dart';
+import '../service/controller.dart';
 import '../service/nav_bar.dart';
 import '../service/notification_service.dart';
 
@@ -30,15 +23,13 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoritePageState extends State<FavoritePage> {
-  String userId = ""; // Initialize as empty string
+  // Variables to manage user data, stocks, and notifications
+  String userId = "";
   List _prices = [];
   List<Stock> _stocks = [];
-
   bool _notificationsAllowed = false;
 
-  //asking for notification permission here because it's the first page the user will land on
-
-  //initializing lists and variables for browsing part
+  // Variables for browsing functionality
   List _browsingStocks = [];
   final List<String> _matches = [];
   final List<String> _matchedCodes = [];
@@ -49,22 +40,23 @@ class _FavoritePageState extends State<FavoritePage> {
   @override
   void initState() {
     super.initState();
-
-    readJson();
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      setState(() {
-        userId = user.uid; // Assign userId if user is logged in
-      });
-    }
-
-    getUsers(); // Invoke getUsers here or wherever it makes sense after userId is set
-
-    _checkNotificationPermission();
+    readJson(); // Load stock prices from JSON
+    _initializeUser(); // Fetch current user and set up user ID
+    _checkNotificationPermission(); // Check notification settings on first load
   }
 
-  //functions for notifications
+  // Initialize user details and fetch user-specific data
+  void _initializeUser() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setState(() {
+        userId = user.uid;
+      });
+      getUsers(); // Fetch the user's saved stocks if logged in
+    }
+  }
+
+  // Check for notification permission and request if necessary
   Future<void> _checkNotificationPermission() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool notificationsAllowed = prefs.getBool('notifications_allowed') ?? false;
@@ -72,14 +64,15 @@ class _FavoritePageState extends State<FavoritePage> {
       _notificationsAllowed = notificationsAllowed;
     });
 
-    // If notifications are not allowed, show permission dialog
     if (!_notificationsAllowed) {
-      _showNotificationPermissionDialog();
+      _showNotificationPermissionDialog(); // Show permission dialog if not allowed
     } else {
-      NotificationService.initializeNotification();
+      NotificationService
+          .initializeNotification(); // Initialize notifications if allowed
     }
   }
 
+  // Toggle notification permission and update the preference
   Future<void> _toggleNotificationPermission(bool allow) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notifications_allowed', allow);
@@ -88,6 +81,7 @@ class _FavoritePageState extends State<FavoritePage> {
     });
   }
 
+  // Display a dialog to request notification permission from the user
   void _showNotificationPermissionDialog() {
     showDialog(
       context: context,
@@ -102,10 +96,7 @@ class _FavoritePageState extends State<FavoritePage> {
                 Navigator.pop(context);
               },
               child: const Text('Don\'t Allow',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 18,
-                  )),
+                  style: TextStyle(color: Colors.grey, fontSize: 18)),
             ),
             TextButton(
               onPressed: () {
@@ -115,29 +106,26 @@ class _FavoritePageState extends State<FavoritePage> {
                     .then((_) {
                   Navigator.pop(context);
                   NotificationService.initializeNotification();
-                  _createAutomaticSchedule();
+                  _createAutomaticSchedule(); // Create notification schedule if allowed
                 });
               },
               child: const Text('Allow',
                   style: TextStyle(
-                    color: Colors.teal,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  )),
-            )
+                      color: Colors.teal,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
+            ),
           ],
         );
       },
     );
   }
 
+  // Schedule automatic notifications based on the time of day
   Future<void> _createAutomaticSchedule() async {
-    // await NotificationService.initializeNotification();
-
+    final time = DateTime.now();
     String title;
     String body;
-
-    final time = DateTime.now();
 
     if (time.hour < 10) {
       title =
@@ -158,72 +146,56 @@ class _FavoritePageState extends State<FavoritePage> {
     );
   }
 
+  // Helper function to calculate the interval for scheduling notifications
+  int _getInterval() {
+    final time = DateTime.now();
+    DateTime nextTime = time.hour < 9
+        ? _getNextWeekdayTime(time, 9, 50)
+        : _getNextWeekdayTime(time, 16, 20); // Using 16:20 for 4:20 PM
+    return nextTime.difference(time).inSeconds;
+  }
+
+  // Function to find the next weekday at a specific time
   DateTime _getNextWeekdayTime(DateTime now, int hour, int minute) {
     DateTime nextTime = DateTime(now.year, now.month, now.day, hour, minute);
     while (nextTime.weekday == 6 || nextTime.weekday == 7) {
+      // Skip weekends
       nextTime = nextTime.add(const Duration(days: 1));
     }
     return nextTime;
   }
 
-  int _getInterval() {
-    int interval2 = 0;
-    final time = DateTime.now();
-
-    if (time.hour < 9) {
-      final nextDayTime = _getNextWeekdayTime(time, 9, 50);
-      interval2 = nextDayTime.difference(time).inSeconds;
-    } else {
-      final nextAfternoonTime = _getNextWeekdayTime(time, 4, 20);
-      interval2 = nextAfternoonTime.difference(time).inSeconds;
-    }
-
-    return interval2;
-  }
-
-  //functions for browsing
-
+  // Add a stock to the favorites list if it doesn't already exist
   void addToFavourites(String stockName, String stockCode) {
     setState(() {
-      Stock stock = Stock(name: stockName, code: stockCode);
-      _stocks.add(stock);
-      _isBrowsing = false;
-      _queryController.clear();
+      if (!_stocks.any((stock) => stock.code == stockCode)) {
+        // Avoid duplicates
+        _stocks.add(Stock(name: stockName, code: stockCode));
+        _isBrowsing = false;
+        _queryController.clear();
+      }
     });
-
-    // print(_isBrowsing);
   }
 
+  // Load stocks from JSON file to populate browsing options
   Future<void> loadStocks() async {
     final String response =
         await rootBundle.loadString('assets/data/stocks.json');
-
     final data = await json.decode(response);
 
     setState(() {
       _browsingStocks = data["stocks"];
-
       for (var stock in _browsingStocks) {
-        // Check if the stock code is present in the list of favorited stocks
-        bool isFavorited =
-            _stocks.any((favStock) => favStock.code == stock['code']);
-
-        // Add the 'isFavorited' field to the stock map
-        stock['isFav'] = isFavorited;
+        stock['isFav'] = _stocks.any(
+            (favStock) => favStock.code == stock['code']); // Mark favorites
       }
-
-      // print(_browsingStocks);
     });
   }
 
+  // Handle changes to the search query and trigger a fuzzy search
   void onQueryChanged(String newQuery) {
     loadStocks();
-
     List<String> stockNames = [];
-    // for (var stock in _browsingStocks) {
-    //   stockNames.add(stock['name']);
-    // }
-
     setState(() {
       for (var stock in _browsingStocks) {
         stockNames.add(stock['name']);
@@ -234,6 +206,7 @@ class _FavoritePageState extends State<FavoritePage> {
     });
   }
 
+  // Perform a fuzzy search on the list of stocks
   void fuzzySearch(List stocks, String query) {
     if (query.isEmpty) {
       _isBrowsing = false;
@@ -243,34 +216,25 @@ class _FavoritePageState extends State<FavoritePage> {
       return;
     }
 
-    double threshold = 1;
-
+    double threshold = query.length == 1
+        ? .99
+        : query.length < 4
+            ? .2
+            : 0.01;
     final fuzzy = Fuzzy(stocks,
         options: FuzzyOptions(
-          isCaseSensitive: false,
-          findAllMatches: true,
-          threshold: threshold,
-        ));
-
+            isCaseSensitive: false,
+            findAllMatches: true,
+            threshold: threshold));
     final result = fuzzy.search(query);
 
-    //these were in my other code, but if I take them off, what happens?
     _matches.clear();
     _matchedCodes.clear();
     _favs.clear();
 
-    if (query.length == 1) {
-      threshold = .99;
-    } else if (query.length < 4) {
-      threshold = .2;
-    } else {
-      threshold = 0.01;
-    }
-
     for (var item in result) {
       if (item.score <= threshold) {
         _matches.add(item.item);
-
         for (var stock in _browsingStocks) {
           if (_matches.contains(stock['name']) &&
               !_matchedCodes.contains(stock['code'])) {
@@ -282,63 +246,51 @@ class _FavoritePageState extends State<FavoritePage> {
     }
   }
 
+  // Read JSON data to initialize stock prices
   Future<void> readJson() async {
     final String response =
         await rootBundle.loadString('assets/data/prices.json');
-
     final data = await json.decode(response);
-
     setState(() {
       _prices = data["prices"];
-
-      // Used for testing purposes only -- functionality testing
-      // print(_stocks);
     });
   }
 
-  // Function to get price by stock code
+  // Fetch price information for a given stock code
   String getPriceByCode(String stockCode) {
-    // Assuming _prices is already populated with the JSON data
-    var priceInfo = _prices.firstWhere(
-      (price) => price['code'] == stockCode,
-      orElse: () => null,
-    );
-
-    if (priceInfo != null) {
-      return priceInfo['price']; // Return the price as a String
-    } else {
-      return 'Not Found'; // Stock code not found
-    }
+    var priceInfo = _prices.firstWhere((price) => price['code'] == stockCode,
+        orElse: () => null);
+    return priceInfo != null ? priceInfo['price'] : 'Not Found';
   }
 
+  // Sign the user out and navigate to the landing page
   void signUserOut(BuildContext context) {
     FirebaseAuth.instance.signOut();
     Navigator.pushReplacementNamed(context, '/landing');
   }
 
+  // Fetch the user's favorite stocks from the database
   final databaseController = DataBase_Controller();
-  String result = "Loading..."; // Initial state of the result
   void getUsers() async {
     if (userId.isNotEmpty) {
       _stocks = await databaseController.getUserStocksByCustomId(userId);
-      setState(() {
-        // Update UI after fetching stocks
-      });
+      setState(() {}); // Refresh the UI with updated stock data
     }
   }
 
+  // Remove a stock from the favorites list
   void onUnFav(String stockCode) {
     setState(() {
       _stocks.removeWhere((stock) => stock.code == stockCode);
     });
   }
 
+  // Display stock details in a modal sheet
   void onOpenStock(String stockCode) async {
     await showMaterialModalBottomSheet(
       context: context,
-      expand: true, // Makes the sheet expand to full height
-      backgroundColor:
-          Colors.transparent, // Set background color to transparent
+      expand: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => ChartDisplay(stockTicker: stockCode),
     );
   }
@@ -347,97 +299,84 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/background.png'),
-              fit: BoxFit.cover,
-            ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
           ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 50,
-              ),
-              Container(
-                padding: const EdgeInsets.only(
-                  bottom: 10,
-                  right: 20,
-                  left: 20,
+        ),
+        child: Column(
+          children: [
+            SizedBox(height: 50),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextField(
+                controller: _queryController,
+                onChanged: onQueryChanged,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color.fromARGB(255, 255, 255, 255),
+                  hintText: 'Browse stocks...',
+                  hintStyle: const TextStyle(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      fontWeight: FontWeight.w400),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: const BorderSide(
+                        color: Color.fromARGB(255, 225, 177, 35), width: 2),
+                  ),
+                  suffixIcon: const Icon(Icons.search,
+                      color: Color.fromARGB(255, 225, 177, 35)),
                 ),
-                child: TextField(
-                    controller: _queryController,
-                    onChanged: onQueryChanged,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 255, 255, 255),
-                      hintText: 'Browse stocks...',
-                      hintStyle: const TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontWeight: FontWeight.w400,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                          borderSide: const BorderSide(
-                            width: 2,
-                            style: BorderStyle.solid,
-                            color: Color.fromARGB(255, 225, 177, 35),
-                          )),
-                      suffixIcon: const Icon(
-                        Icons.search,
-                        color: Color.fromARGB(255, 225, 177, 35),
-                      ),
-                    )),
               ),
-              _isBrowsing == false
-                  ? _stocks.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No saved quotes. Add some in the Browsing Page',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'serif',
-                            ),
-                          ),
-                        )
-                      : Expanded(
-                          child: ListView.builder(
-                            itemCount: _stocks.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  MyFavCard(
-                                    stockCode: _stocks[index].code,
-                                    userId: userId,
-                                    onUnFav: () => setState(() {
-                                      onUnFav(_stocks[index].code);
-                                    }),
-                                    onOpenChart: () => setState(() {
-                                      onOpenStock(_stocks[index].code);
-                                    }),
-                                    navigatorKey: navigatorKey,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        )
-                  : Expanded(
-                      child: ListView.builder(
-                          itemCount: _matches.length,
+            ),
+            _isBrowsing == false
+                ? _stocks.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No saved quotes. Add some in the Browsing Page',
+                          style: TextStyle(
+                              color: Colors.black, fontFamily: 'serif'),
+                        ),
+                      )
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: _stocks.length,
                           itemBuilder: (context, index) {
-                            return MyCard(
-                              addToFavourites: () => setState(() {
-                                addToFavourites(
-                                    _matches[index], _matchedCodes[index]);
+                            return MyFavCard(
+                              stockCode: _stocks[index].code,
+                              userId: userId,
+                              onUnFav: () => setState(() {
+                                onUnFav(_stocks[index].code);
                               }),
-                              isFav: _favs[index],
-                              userID: userId,
-                              stockName: _matches[index],
-                              stockCode: _matchedCodes[index],
+                              onOpenChart: () => setState(() {
+                                onOpenStock(_stocks[index].code);
+                              }),
+                              navigatorKey: navigatorKey,
                             );
-                          }))
-            ],
-          )),
+                          },
+                        ),
+                      )
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: _matches.length,
+                      itemBuilder: (context, index) {
+                        return MyCard(
+                          addToFavourites: () => setState(() {
+                            addToFavourites(
+                                _matches[index], _matchedCodes[index]);
+                          }),
+                          isFav: _favs[index],
+                          userID: userId,
+                          stockName: _matches[index],
+                          stockCode: _matchedCodes[index],
+                        );
+                      },
+                    ),
+                  ),
+          ],
+        ),
+      ),
     );
   }
 }

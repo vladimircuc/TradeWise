@@ -40,18 +40,21 @@ class _PortfolioPageState extends State<PortfolioPage> {
   @override
   void initState() {
     super.initState();
-    getAllTimeProfit();
-    getUnrealisedProfit();
+    getAllTimeProfit(); // Fetch all-time profit
+    getUnrealisedProfit(); // Fetch unrealised profit
 
+    // Fetch stock information if available, else set default values
     if (widget.areThereStocks) {
       getStockInfo();
     } else {
       worstStock = "No Stock";
       bestStock = "No Stock";
     }
-    adjustedDataMap = adjustDataMap(widget.dataMap);
+    adjustedDataMap =
+        adjustDataMap(widget.dataMap); // Adjust data map for pie chart
   }
 
+  // Adjust the data map to combine small values into an "Others" category
   Map<String, double> adjustDataMap(Map<String, double> originalDataMap) {
     final double totalValue =
         originalDataMap.values.fold(0, (sum, e) => sum + e);
@@ -61,42 +64,43 @@ class _PortfolioPageState extends State<PortfolioPage> {
     originalDataMap.forEach((key, value) {
       final double percentage = (value / totalValue) * 100;
       if (percentage < 5) {
-        // Aggregate into "Others"
-        othersValue += value;
+        othersValue += value; // Aggregate small values into "Others"
       } else {
-        // Keep as is
-        adjustedDataMap[key] = value;
+        adjustedDataMap[key] = value; // Retain larger values
       }
     });
 
     if (othersValue > 0) {
-      // Add the "Others" category if necessary
-      adjustedDataMap['Others'] = othersValue;
+      adjustedDataMap['Others'] =
+          othersValue; // Add "Others" category if needed
     }
 
     return adjustedDataMap;
   }
 
+  // Fetch the user's all-time profit from the database
   void getAllTimeProfit() async {
     aTProfit = await databaseController.getAllTimeProfit(widget.userId);
-    setState(() {});
+    setState(() {}); // Update the UI with the new profit value
   }
 
+  // Fetch the user's unrealised profit from the database
   void getUnrealisedProfit() async {
     unrealisedProfit =
         await databaseController.getUnrealisedProfit(widget.userId);
-    setState(() {});
+    setState(() {}); // Update the UI with the new unrealised profit value
   }
 
+  // Fetch best and worst stock performers from the database
   void getStockInfo() async {
     Map<String, double> stocks =
         await databaseController.getSTocksForPerformers(widget.userId);
-
     bestStock = stocks.keys.first;
     bestPercentage = stocks[bestStock]!;
     worstStock = stocks.keys.first;
     worstPercentage = stocks[worstStock]!;
 
+    // Determine the best and worst performers
     stocks.forEach((key, value) {
       if (value < worstPercentage) {
         worstStock = key;
@@ -108,67 +112,63 @@ class _PortfolioPageState extends State<PortfolioPage> {
       }
     });
 
-    setState(() {});
+    setState(() {}); // Refresh the UI with the updated stock information
   }
 
+  // Display an error dialog with a custom message
   void _showAlertDialog(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
+        title: const Text(
           'Error',
           style: TextStyle(color: Colors.red, fontSize: 35),
-        ), // Adds a title to the AlertDialog
+        ),
         content: Text(
           message,
-          style: TextStyle(fontSize: 15),
-        ), // The main message text
+          style: const TextStyle(fontSize: 15),
+        ),
         shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.red, width: 3),
-            borderRadius: BorderRadius.circular(
-                15.0)), // Rounds the corners of the AlertDialog
-        backgroundColor: Colors.white, // Sets a custom background color
-        elevation: 24.0, // Shadow elevation for 3D effect
+            side: const BorderSide(color: Colors.red, width: 3),
+            borderRadius: BorderRadius.circular(15.0)),
+        backgroundColor: Colors.white,
+        elevation: 24.0,
         actions: <Widget>[
-          // Actions are typically buttons at the bottom of the dialog
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Closes the dialog
+              Navigator.of(context).pop(); // Close the dialog
             },
             style: TextButton.styleFrom(
-              iconColor: Colors.blue, // Text color
               shape: RoundedRectangleBorder(
-                side: BorderSide(
-                    color: Colors.blue, width: 2), // Border color and width
-                borderRadius: BorderRadius.circular(16.0), // Border radius
+                side: const BorderSide(color: Colors.blue, width: 2),
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              padding: EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 10), // Button padding
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: Text(
+            child: const Text(
               'OK',
               style: TextStyle(color: Colors.blue),
-            ), // Text for the button
+            ),
           ),
         ],
       ),
     );
   }
 
+  // Search for another user and navigate to their portfolio
   void searchUser() async {
     String searchedUserId =
         await databaseController.getUserIdByName(nameController.text);
 
-    if (searchedUserId == "") {
+    if (searchedUserId.isEmpty) {
       _showAlertDialog("There is no user named ${nameController.text}");
     } else {
       Map<String, double> newDataMap =
           await databaseController.getDataForChart(searchedUserId);
-      bool newAreThereStocks = true;
+      bool newAreThereStocks = newDataMap.isNotEmpty;
 
-      if (newDataMap.isEmpty) {
+      if (!newAreThereStocks) {
         newDataMap["no stocks :(("] = 0;
-        newAreThereStocks = false;
       }
 
       List<ProfitInTime> newChartData =
@@ -189,278 +189,192 @@ class _PortfolioPageState extends State<PortfolioPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Portfolio"),
+          title: const Text("Portfolio"),
           centerTitle: true,
           backgroundColor: Colors.white,
         ),
         body: Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           alignment: Alignment.center,
           child: Column(
             children: [
-              Expanded(
+              _buildUserSearchRow(),
+              _buildPieChart(),
+              _buildProfitCards(),
+              _buildStockPerformanceCards(),
+              const SizedBox(height: 10),
+              _buildProfitLineChart(),
+            ],
+          ),
+        ));
+  }
+
+  // Build the user search row
+  Widget _buildUserSearchRow() {
+    return Expanded(
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Search for another user',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.name),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 1,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+              child: const Text("Search"),
+              onPressed: searchUser,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Build the pie chart displaying stock distribution
+  Widget _buildPieChart() {
+    return Expanded(
+      flex: 2,
+      child: PieChart(
+        dataMap: adjustedDataMap,
+        chartValuesOptions: const ChartValuesOptions(
+          showChartValueBackground: true,
+          showChartValues: true,
+          showChartValuesInPercentage: true,
+          decimalPlaces: 1,
+        ),
+      ),
+    );
+  }
+
+  // Build the profit cards displaying all-time profit and unrealised profit
+  Widget _buildProfitCards() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildCard("All time profit", aTProfit),
+        _buildCard("Unrealised Profit", unrealisedProfit),
+      ],
+    );
+  }
+
+  // Build individual stock performance cards
+  Widget _buildStockPerformanceCards() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildStockCard("Best Performer", bestStock, bestPercentage),
+        _buildStockCard("Worst Performer", worstStock, worstPercentage),
+      ],
+    );
+  }
+
+  // Build individual card displaying stock information or profits
+  Widget _buildCard(String title, double value) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+      elevation: 5.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: SizedBox(
+          width: 130,
+          height: 50,
+          child: Column(
+            children: [
+              Center(child: Text(title)),
+              Center(
+                child: Text(
+                  "${value.toStringAsFixed(2)}\$",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: value > 0
+                        ? Colors.blue
+                        : value < 0
+                            ? Colors.red
+                            : Colors.grey,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Build individual stock performance card (Best and Worst)
+  Widget _buildStockCard(String title, String stock, double percentage) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+      elevation: 5.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: SizedBox(
+          width: 130,
+          height: 50,
+          child: Column(
+            children: [
+              Center(child: Text(title)),
+              Center(
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      flex: 3,
-                      child: TextField(
-                          controller: nameController,
-                          decoration: InputDecoration(
-                            labelText: 'Search for another user',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.name),
+                    Text(
+                      stock,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white),
-                        child: Text("Search"),
-                        onPressed: searchUser,
+                    Text(
+                      percentage > 0
+                          ? " ↑${percentage.toStringAsFixed(2)}%"
+                          : percentage < 0
+                              ? " ↓${percentage.toStringAsFixed(2)}%"
+                              : " ${percentage.toStringAsFixed(2)}%",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: percentage > 0
+                            ? Colors.blue
+                            : percentage < 0
+                                ? Colors.red
+                                : Colors.grey,
                       ),
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                // Makes the chart flexible
-                flex: 2, // Adjust the flex factor as needed to allocate space
-                child: PieChart(
-                  dataMap: adjustedDataMap,
-                  chartValuesOptions: ChartValuesOptions(
-                    showChartValueBackground: true,
-                    showChartValues: true,
-                    showChartValuesInPercentage: true,
-                    showChartValuesOutside: false,
-                    decimalPlaces: 1,
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Card(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                    elevation: 5.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: SizedBox(
-                          width: 130, // Set your desired width
-                          height: 50,
-                          child: Column(
-                            children: [
-                              Center(child: Text("All time profit")),
-                              Center(
-                                child: Text(
-                                  "${aTProfit.toStringAsFixed(2)}\$",
-                                  style: TextStyle(
-                                      fontSize: 20, // Size of the text
-                                      fontWeight:
-                                          FontWeight.bold, // Make text bold
-                                      color: aTProfit > 0
-                                          ? Colors.blue
-                                          : aTProfit < 0
-                                              ? Colors.red
-                                              : Colors.grey),
-                                ),
-                              )
-                            ],
-                          )),
-                    ),
-                  ),
-                  Card(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                    elevation: 5.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: SizedBox(
-                          width: 130, // Set your desired width
-                          height: 50,
-                          child: Center(
-                              child: Column(
-                            children: [
-                              Text("Unrealised Profit"),
-                              Center(
-                                child: Text(
-                                  "${unrealisedProfit.toStringAsFixed(2)}\$",
-                                  style: TextStyle(
-                                      fontSize: 20, // Size of the text
-                                      fontWeight:
-                                          FontWeight.bold, // Make text bold
-                                      color: unrealisedProfit > 0
-                                          ? Colors.blue
-                                          : unrealisedProfit < 0
-                                              ? Colors.red
-                                              : Colors.grey),
-                                ),
-                              )
-                            ],
-                          ))),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Card(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                    elevation: 5.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: SizedBox(
-                          width: 130, // Set your desired width
-                          height: 50,
-                          child: Center(
-                              child: Column(
-                            children: [
-                              Text("Best Performer"),
-                              Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        bestStock,
-                                        style: TextStyle(
-                                          fontSize: 20, // Size of the text
-                                          fontWeight:
-                                              FontWeight.bold, // Make text bold
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                    Center(
-                                        child: widget.areThereStocks
-                                            ? Text(
-                                                bestPercentage > 0
-                                                    ? " ↑${bestPercentage.toStringAsFixed(2)}%"
-                                                    : bestPercentage < 0
-                                                        ? " ↓${bestPercentage.toStringAsFixed(2)}%"
-                                                        : " ${bestPercentage.toStringAsFixed(2)}%",
-                                                style: TextStyle(
-                                                    fontSize:
-                                                        15, // Size of the text
-                                                    fontWeight: FontWeight
-                                                        .bold, // Make text bold
-                                                    color: bestPercentage > 0
-                                                        ? Colors.blue
-                                                        : bestPercentage < 0
-                                                            ? Colors.red
-                                                            : Colors.grey))
-                                            : const Text("")),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ))),
-                    ),
-                  ),
-                  Card(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                    elevation: 5.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: SizedBox(
-                          width: 130, // Set your desired width
-                          height: 50,
-                          child: Center(
-                              child: Column(
-                            children: [
-                              Text("Worst Performer"),
-                              Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      worstStock,
-                                      style: TextStyle(
-                                        fontSize: 20, // Size of the text
-                                        fontWeight:
-                                            FontWeight.bold, // Make text bold
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    Center(
-                                      child: widget.areThereStocks
-                                          ? Text(
-                                              worstPercentage > 0
-                                                  ? " ↑${worstPercentage.toStringAsFixed(2)}%"
-                                                  : worstPercentage < 0
-                                                      ? " ↓${worstPercentage.toStringAsFixed(2)}%"
-                                                      : " ${worstPercentage.toStringAsFixed(2)}%",
-                                              style: TextStyle(
-                                                  fontSize:
-                                                      15, // Size of the text
-                                                  fontWeight: FontWeight
-                                                      .bold, // Make text bold
-                                                  color: worstPercentage > 0
-                                                      ? Colors.blue
-                                                      : worstPercentage < 0
-                                                          ? Colors.red
-                                                          : Colors.grey))
-                                          : const Text(""),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ))),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                  flex: 2,
-                  child: Container(
-                      child: SfCartesianChart(
-
-                          // Chart Title
-                          primaryXAxis: DateTimeAxis(
-                            dateFormat: DateFormat(
-                                'MM/dd'), // Format the date as you want
-                            // X Axis Title
-                          ),
-                          primaryYAxis: NumericAxis(
-                            //numberFormat: NumberFormat
-                            //.percentPattern(), // Format the number with a percentage sign
-                            title:
-                                AxisTitle(text: 'Profit (%)'), // Y Axis Title
-                          ),
-                          series: <CartesianSeries>[
-                        // Renders line chart
-                        LineSeries<ProfitInTime, DateTime>(
-                          dataSource: widget.chartData,
-                          xValueMapper: (ProfitInTime profit, _) => profit.day,
-                          yValueMapper: (ProfitInTime profit, _) =>
-                              profit.profit,
-                          //dataLabelSettings: DataLabelSettings(
-                          //isVisible: true), // Show data labels
-                          //name:
-                          //'Profit' // Name of the series, shows in legend
-                        )
-                      ])))
             ],
           ),
-        ));
+        ),
+      ),
+    );
+  }
+
+  // Build a line chart showing profit over time
+  Widget _buildProfitLineChart() {
+    return Expanded(
+      flex: 2,
+      child: SfCartesianChart(
+        primaryXAxis: DateTimeAxis(dateFormat: DateFormat('MM/dd')),
+        primaryYAxis: NumericAxis(title: AxisTitle(text: 'Profit (%)')),
+        series: <CartesianSeries>[
+          LineSeries<ProfitInTime, DateTime>(
+            dataSource: widget.chartData,
+            xValueMapper: (ProfitInTime profit, _) => profit.day,
+            yValueMapper: (ProfitInTime profit, _) => profit.profit,
+          ),
+        ],
+      ),
+    );
   }
 }

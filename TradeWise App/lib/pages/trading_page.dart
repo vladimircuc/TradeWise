@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../service/controller.dart'; // Confirm this import path is correct
+import '../service/controller.dart';
 
 class TradingPage extends StatefulWidget {
   final String stockCode;
@@ -20,26 +20,31 @@ class TradingPage extends StatefulWidget {
 
 class _TradingPageState extends State<TradingPage> {
   final DataBase_Controller databaseController = DataBase_Controller();
-  double balance = 0.0; // Initial balance
+  double balance = 0.0; // User's current balance
   TextEditingController balanceController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    fetchBalance();
+    fetchBalance(); // Fetch user's balance when the page is initialized
   }
 
+  // Fetch the user's balance from the database
   void fetchBalance() async {
     double userBalance = await databaseController.getUserBalance(widget.userId);
-    setState(() => balance = userBalance);
+    setState(
+        () => balance = userBalance); // Update balance state with fetched value
   }
 
+  // Deposit a fixed amount of $5000 to the user's balance
   void depositMoney() async {
     final newBalance = balance + 5000;
     await databaseController.updateUserBalance(widget.userId, newBalance);
-    setState(() => balance = newBalance);
+    setState(
+        () => balance = newBalance); // Update balance state with the new amount
   }
 
+  // Place a trade by deducting the investment amount from the balance and updating the transaction history
   void placeTrade() async {
     final dollarAmount = double.parse(balanceController.text);
     final amountOfStock = dollarAmount / widget.price;
@@ -53,95 +58,74 @@ class _TradingPageState extends State<TradingPage> {
           "You bought ${amountOfStock.toStringAsFixed(2)} worth of ${widget.stockCode}");
       await databaseController.updateUserBalance(
           widget.userId, balance - dollarAmount);
-      setState(() => balance -= dollarAmount);
+      setState(() =>
+          balance -= dollarAmount); // Update balance after placing the trade
     }
-    balanceController.clear();
+    balanceController.clear(); // Clear the input field after the transaction
   }
 
+  // Show a success dialog after placing a trade
   void _showAlertDialogTrans(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Success',
-          style:
-              TextStyle(color: Color.fromARGB(255, 13, 1, 140), fontSize: 35),
-        ), // Adds a title to the AlertDialog
-        content: Text(
-          message,
-          style: TextStyle(fontSize: 15),
-        ), // The main message text
+        title: const Text('Success',
+            style: TextStyle(
+                color: Color.fromARGB(255, 13, 1, 140), fontSize: 35)),
+        content: Text(message, style: const TextStyle(fontSize: 15)),
         shape: RoundedRectangleBorder(
-            side: BorderSide(color: Color.fromARGB(255, 13, 1, 140), width: 3),
-            borderRadius: BorderRadius.circular(
-                15.0)), // Rounds the corners of the AlertDialog
-        backgroundColor: Colors.white, // Sets a custom background color
-        elevation: 24.0, // Shadow elevation for 3D effect
+          side: const BorderSide(
+              color: Color.fromARGB(255, 13, 1, 140), width: 3),
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 24.0,
         actions: <Widget>[
-          // Actions are typically buttons at the bottom of the dialog
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Closes the dialog
-            },
+            onPressed: () => Navigator.of(context).pop(), // Close the dialog
             style: TextButton.styleFrom(
-              iconColor: Color.fromARGB(255, 13, 1, 140), // Text color
+              iconColor: const Color.fromARGB(255, 13, 1, 140),
               shape: RoundedRectangleBorder(
-                side: BorderSide(
-                    color: Color.fromARGB(255, 13, 1, 140),
-                    width: 2), // Border color and width
-                borderRadius: BorderRadius.circular(16.0), // Border radius
+                side: const BorderSide(
+                    color: Color.fromARGB(255, 13, 1, 140), width: 2),
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              padding: EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 10), // Button padding
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: Text(
-              'OK',
-              style: TextStyle(color: Color.fromARGB(255, 13, 1, 140)),
-            ), // Text for the button
+            child: const Text('OK',
+                style: TextStyle(color: Color.fromARGB(255, 13, 1, 140))),
           ),
         ],
       ),
     );
   }
 
+  // Show an error dialog if there's not enough balance to place a trade
   void _showAlertDialogError(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Error',
-          style: TextStyle(color: Colors.red, fontSize: 35),
-        ), // Adds a title to the AlertDialog
-        content: Text(
-          message,
-          style: TextStyle(fontSize: 15),
-        ), // The main message text
+        title: const Text('Error',
+            style: TextStyle(color: Colors.red, fontSize: 35)),
+        content: Text(message, style: const TextStyle(fontSize: 15)),
         shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.red, width: 3),
-            borderRadius: BorderRadius.circular(
-                15.0)), // Rounds the corners of the AlertDialog
-        backgroundColor: Colors.white, // Sets a custom background color
-        elevation: 24.0, // Shadow elevation for 3D effect
+          side: const BorderSide(color: Colors.red, width: 3),
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 24.0,
         actions: <Widget>[
-          // Actions are typically buttons at the bottom of the dialog
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Closes the dialog
-            },
+            onPressed: () => Navigator.of(context).pop(), // Close the dialog
             style: TextButton.styleFrom(
-              iconColor: Colors.blue, // Text color
+              iconColor: Colors.blue,
               shape: RoundedRectangleBorder(
-                side: BorderSide(
-                    color: Colors.blue, width: 2), // Border color and width
-                borderRadius: BorderRadius.circular(16.0), // Border radius
+                side: const BorderSide(color: Colors.blue, width: 2),
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              padding: EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 10), // Button padding
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: Text(
-              'OK',
-              style: TextStyle(color: Colors.blue),
-            ), // Text for the button
+            child: const Text('OK', style: TextStyle(color: Colors.blue)),
           ),
         ],
       ),
@@ -152,7 +136,7 @@ class _TradingPageState extends State<TradingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Trading Page"),
+        title: const Text("Trading Page"),
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
@@ -163,83 +147,87 @@ class _TradingPageState extends State<TradingPage> {
             fit: BoxFit.cover,
           ),
         ),
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         alignment: Alignment.center,
         child: Column(
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               "Balance: \$${balance.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Color.fromARGB(198, 192, 162, 14),
+                foregroundColor: const Color.fromARGB(198, 192, 162, 14),
                 backgroundColor: Colors.white,
-                side: BorderSide(
+                side: const BorderSide(
                     color: Color.fromARGB(198, 192, 162, 14), width: 3),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                    borderRadius: BorderRadius.circular(10)),
               ),
-              child: Text(
+              child: const Text(
                 "Deposit 5k dollars",
                 style: TextStyle(
-                    color: const Color.fromARGB(198, 192, 162, 14),
+                    color: Color.fromARGB(198, 192, 162, 14),
                     fontWeight: FontWeight.bold),
               ),
               onPressed: depositMoney,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               "Current price of ${widget.stockCode} is \$${widget.price}",
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black),
             ),
-            SizedBox(height: 20),
-            TextField(
-              controller: balanceController,
-              decoration: InputDecoration(
-                labelText: 'Amount to Invest',
-                labelStyle: TextStyle(color: Colors.black),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black, width: 2),
-                ),
-                suffixIcon: Icon(
-                  Icons.attach_money,
-                  color: Colors.black,
-                ),
-              ),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))
-              ],
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Color.fromARGB(198, 192, 162, 14),
-                backgroundColor: Colors.white,
-                side: BorderSide(
-                    color: Color.fromARGB(198, 192, 162, 14), width: 3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                "Place Trade",
-                style: TextStyle(
-                    color: const Color.fromARGB(198, 192, 162, 14),
-                    fontWeight: FontWeight.bold),
-              ),
-              onPressed: placeTrade,
-            ),
+            const SizedBox(height: 20),
+            _buildInvestmentTextField(),
+            const SizedBox(height: 20),
+            _buildPlaceTradeButton(),
           ],
         ),
       ),
+    );
+  }
+
+  // Build the text field for entering the amount to invest
+  Widget _buildInvestmentTextField() {
+    return TextField(
+      controller: balanceController,
+      decoration: const InputDecoration(
+        labelText: 'Amount to Invest',
+        labelStyle: TextStyle(color: Colors.black),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black, width: 2),
+        ),
+        suffixIcon: Icon(Icons.attach_money, color: Colors.black),
+      ),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))
+      ],
+    );
+  }
+
+  // Build the button to place a trade
+  Widget _buildPlaceTradeButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: const Color.fromARGB(198, 192, 162, 14),
+        backgroundColor: Colors.white,
+        side: const BorderSide(
+            color: Color.fromARGB(198, 192, 162, 14), width: 3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      child: const Text(
+        "Place Trade",
+        style: TextStyle(
+            color: Color.fromARGB(198, 192, 162, 14),
+            fontWeight: FontWeight.bold),
+      ),
+      onPressed: placeTrade,
     );
   }
 }
